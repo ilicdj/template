@@ -1,16 +1,16 @@
 import * as THREE from 'three'
 import { REVISION } from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
-import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js'
+// import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
+// import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js'
 
 import GUI from 'lil-gui'
 import gsap from 'gsap'
 import testVertex from './shaders/testVertex.glsl'
 import testFragment from './shaders/testFragment.glsl'
-import gltf from '/face.glb?url'
+// import gltf from '/face.glb?url'
 
-console.log(gltf)
+// console.log(gltf)
 
 
 export default class Sketch {
@@ -42,14 +42,14 @@ export default class Sketch {
     this.time = 0
 
     // Load with DRACO
-    const THREE_PATH = `https://unpkg.com/three@0.${REVISION}.x`
-    const manager = new THREE.LoadingManager()
-    this.dracoLoader = new DRACOLoader(manager)
-    this.dracoLoader.setDecoderPath(`${THREE_PATH}/examples/js/libs/draco/gltf/`)
+    // const THREE_PATH = `https://unpkg.com/three@0.${REVISION}.x`
+    // const manager = new THREE.LoadingManager()
+    // this.dracoLoader = new DRACOLoader(manager)
+    // this.dracoLoader.setDecoderPath(`${THREE_PATH}/examples/js/libs/draco/gltf/`)
     // Load with GLTFLoader
-    this.gltfLoader = new GLTFLoader()
-    this.gltfLoader.setDRACOLoader(this.dracoLoader)
-    this.gltfLoader.load(gltf, (gltf) => { })
+    // this.gltfLoader = new GLTFLoader()
+    // this.gltfLoader.setDRACOLoader(this.dracoLoader)
+    // this.gltfLoader.load(gltf, (gltf) => { })
 
     // this.isPlaying = true
 
