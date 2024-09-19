@@ -26,6 +26,8 @@ export default class Sketch {
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
     this.renderer.setSize(this.width, this.height)
     this.renderer.setClearColor(0xeeeeee, 1)
+    this.renderer.physicallyCorrectLights = true
+    this.renderer.outputEncoding = THREE.sRGBEncoding
 
     this.container.appendChild(this.renderer.domElement)
 
@@ -51,21 +53,21 @@ export default class Sketch {
     // this.gltfLoader.setDRACOLoader(this.dracoLoader)
     // this.gltfLoader.load(gltf, (gltf) => { })
 
-    // this.isPlaying = true
+    this.isPlaying = true
 
 
+    this.setupSettings()
     this.addObjects()
     this.render()
-    this.setupSettings()
     this.resize()
   }
 
   setupSettings() {
     this.settings = {
-      process: 0
+      progress: 0
     }
     this.gui = new GUI()
-    this.gui.add(this.settings, 'process', 0, 1, 0.01).onChange(val => { })
+    this.gui.add(this.settings, 'progress', 0, 1, 0.01)
   }
 
   addObjects() {
@@ -73,20 +75,27 @@ export default class Sketch {
     this.material = new THREE.ShaderMaterial({
       vertexShader: testVertex,
       fragmentShader: testFragment,
-      side: THREE.DoubleSide
+      side: THREE.DoubleSide,
+      uniforms: {
+        time: { type: "f", value: 0 },
+        progress: { type: 'f', value: 0 },
+      }
     })
 
     this.mesh = new THREE.Mesh(this.geometry, this.material)
     this.scene.add(this.mesh)
   }
 
-  render() {
-    this.time++
-    this.controls.update()
-    // this.mesh.rotation.x += 0.01
-    // this.mesh.rotation.y += 0.02
-    this.renderer.render(this.scene, this.camera)
-    window.requestAnimationFrame(this.render.bind(this))
+  stop() {
+    this.isPlaying = false
+  }
+
+  play() {
+    if(!this.isPlaying)
+    {
+      this.render()
+      this.isPlaying = true
+    }
   }
 
   handleResize() {
@@ -101,6 +110,18 @@ export default class Sketch {
     window.addEventListener('resize', this.handleResize.bind(this))
   }
 
+  render() {
+    this.time += 0.01
+    this.controls.update()
+    window.requestAnimationFrame(this.render.bind(this))
+    // this.mesh.rotation.x += 0.01
+    // this.mesh.rotation.y += 0.02
+    // Update uniforms
+    this.material.uniforms.time.value = this.time
+    this.material.uniforms.progress.value = this.settings.progress
+    
+    this.renderer.render(this.scene, this.camera)
+  }
 }
 
 new Sketch({ dom: document.querySelector('#container') })

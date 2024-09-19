@@ -1,4 +1,5 @@
 varying vec2 vUv;
+uniform float progress;
 void main() {
 
   vUv = uv;
