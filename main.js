@@ -1,5 +1,4 @@
 import * as THREE from 'three'
-import { REVISION } from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 // import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 // import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js'
@@ -8,7 +7,13 @@ import GUI from 'lil-gui'
 import gsap from 'gsap'
 import testVertex from './shaders/testVertex.glsl'
 import testFragment from './shaders/testFragment.glsl'
-// import gltf from '/face.glb?url'
+
+// Postprocessing
+import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
+import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
+import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js'
+
 
 // console.log(gltf)
 
@@ -43,31 +48,44 @@ export default class Sketch {
     // this.controls.enableDamping = true
     this.time = 0
 
-    // Load with DRACO
-    // const THREE_PATH = `https://unpkg.com/three@0.${REVISION}.x`
-    // const manager = new THREE.LoadingManager()
-    // this.dracoLoader = new DRACOLoader(manager)
-    // this.dracoLoader.setDecoderPath(`${THREE_PATH}/examples/js/libs/draco/gltf/`)
-    // Load with GLTFLoader
-    // this.gltfLoader = new GLTFLoader()
-    // this.gltfLoader.setDRACOLoader(this.dracoLoader)
-    // this.gltfLoader.load(gltf, (gltf) => { })
+    // this.dracoLoader = new DRACOLoader()
+    // this.dracoLoader.setDecoderPath('./node_modules/three/examples/jsm/libs/draco/')
+    // this.gltf = new GLTFLoader()
+    // this.gltf.setDRACOLoader(this.dracoLoader)
 
     this.isPlaying = true
 
 
     this.setupSettings()
+    this.addPost()
     this.addObjects()
     this.render()
     this.resize()
   }
 
   setupSettings() {
+    let that = this
     this.settings = {
-      progress: 0
+      progress: 0,
+      bloomStrength: 0,
+      bloomThreshold: 0,
+      bloomRadius: 0,
     }
     this.gui = new GUI()
     this.gui.add(this.settings, 'progress', 0, 1, 0.01)
+  }
+
+  addPost() {
+    this.renderScene = new RenderPass(this.scene, this.camera);
+
+    this.bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.5, 0.4, 0.85);
+    this.bloomPass.threshold = this.settings.bloomThreshold;
+    this.bloomPass.strength = this.settings.bloomStrength;
+    this.bloomPass.radius = this.settings.bloomRadius;
+
+    this.composer = new EffectComposer(this.renderer);
+    this.composer.addPass(this.renderScene);
+    this.composer.addPass(this.bloomPass);
   }
 
   addObjects() {
@@ -84,6 +102,15 @@ export default class Sketch {
 
     this.mesh = new THREE.Mesh(this.geometry, this.material)
     this.scene.add(this.mesh)
+
+
+    // Model
+    // this.gltf.load('./model.glb', gltf => {
+    //   this.scene.add(gltf.scene);
+    //   this.model = gltf.scene.children[0];
+    //   this.model.scale.set(0.1, 0.1, 0.1);
+    //   this.model.geometry.center();
+    // });
   }
 
   stop() {
@@ -102,6 +129,10 @@ export default class Sketch {
     this.width = window.innerWidth
     this.height = window.innerHeight
     this.renderer.setSize(this.width, this.height)
+
+    // Postprocessing
+    // this.composer.setSize(this.width, this.height)
+
     this.camera.aspect = this.width / this.height
     this.camera.updateProjectionMatrix()
   }
@@ -120,6 +151,8 @@ export default class Sketch {
     this.material.uniforms.time.value = this.time
     this.material.uniforms.progress.value = this.settings.progress
     
+    // Postprocessing
+    // this.composer.render()
     this.renderer.render(this.scene, this.camera)
   }
 }
